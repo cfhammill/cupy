@@ -271,7 +271,8 @@ def _find_static_library(name: str) -> str:
     if cuda_path is None:
         raise Exception(f'Could not find {filename}: CUDA path unavailable')
 
-    possible_paths = [os.path.join(cuda_path, libdir, filename) for libdir in libdirs]
+    possible_paths = [os.path.join(cuda_path, libdir, filename)
+                      for libdir in libdirs]
     found_dir = False
     for path in possible_paths:
         found_dir = os.path.exists(path)
