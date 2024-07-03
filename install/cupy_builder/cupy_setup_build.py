@@ -260,19 +260,29 @@ def _rpath_base():
 def _find_static_library(name: str) -> str:
     if PLATFORM_LINUX:
         filename = f'lib{name}.a'
-        libdir = 'lib64'
+        libdirs = ['lib64', "lib"]
     elif PLATFORM_WIN32:
         filename = f'{name}.lib'
-        libdir = 'lib\\x64'
+        libdirs = ['lib\\x64']
     else:
         raise Exception('not supported on this platform')
 
     cuda_path = build.get_cuda_path()
     if cuda_path is None:
         raise Exception(f'Could not find {filename}: CUDA path unavailable')
-    path = os.path.join(cuda_path, libdir, filename)
-    if not os.path.exists(path):
-        raise Exception(f'Could not find {filename}: {path} does not exist')
+
+    possible_paths = [os.path.join(cuda_path, libdir, filename) for libdir in libdirs]
+    found_dir = False
+    for path in possible_paths:
+        found_dir = os.path.exists(path)
+        if found_dir:
+            break
+
+    if not found_dir:
+        path_list = "\n".join(possible_paths)
+        raise Exception(f'Could not find {filename} \n'
+                        f'{path_list} \n'
+                        'do not exist.')
     return path
 
 
